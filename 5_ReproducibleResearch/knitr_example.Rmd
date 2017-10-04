@@ -1,0 +1,51 @@
+# My First Knitr Document 
+CRPB
+
+## Introduction
+
+-This is some text.  Here is a code chunk.
+-command results = "hide" hides the result 
+-command echo=FALSE does NOT print the code
+-you can name the the code chuck; this is added after you write r.  In the example below, word "simulation" is the name of the code chunk
+
+```{r simulation, echo=FALSE, results="hide"}
+set.seed(1)
+x <- rnorm(100)
+mean(x)
+```
+
+- command time <- format(Sys.time() tells you the current time
+- if you write a command with a function that needs to be completed such as the one above of time, then this can be processed by stating R and the name of the function and puting it in between of the following  ` ` 
+
+```{r writetime, echo=FALSE}
+time <- format(Sys.time(), "%a %b %d %X %Y")
+rand <- rnorm(1)
+```
+```{r}
+
+```
+
+-The Current time is `r time`. My favorite random number is `r rand`.
+
+-Below is an example of an equation and its scatterplot of the data.  This will be split into 2 chunks 
+
+1. Let's first simulate some data  
+```{r simulatedata, echo=TRUE}
+x <- rnorm(100); y <- x + rnorm(100, sd = 0.5)
+```
+
+2. Here is a scatterplot of the data.
+```{r scatterplot, fig.height= 4}
+par(mar =c(5, 4, 1, 1), las = 1)
+plot(x, y, main = "My Simulated Data")
+```
+
+-Below is an example making a table using xtable 
+
+A.  Load the data using datasets -> airquality 
+```{r fitmodel}
+library(datasets)
+library(xtable)
+data(airquality)
+fit <- lm(Ozone ~ Wind + Temp + Solar.R, data = airquality)
+```
