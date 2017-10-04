@@ -1,0 +1,136 @@
+---
+title: 'Reproducible Research: Course Project 2'
+author: "Cesar Rene Pabon Bernal"
+date: "June 26, 2016"
+output: html_document
+---
+
+
+## Synopsis
+
+In this report we aim to describe which severe weather types that have the greatest economic and health effects in the United States between the years 1950 and 2011.  Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.  Our overall hypotheses is that floods cause the most economic impact, as opposed to tornadoes which cause the most injuries.  To investigate this hypothesis, we obtained data from the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database for the years 1996 and 2011 (the most recent complete year available). From these data, we found that, in the U.S. from the years of 1950 and 2011, floods caused the most economic damage and tornadoes are the most injuries. 
+
+## Loading and Processing the Raw Data
+
+From the [National Oceanic and Atmospheric Administration's (NOAA)](http://www.nws.noaa.gov/directives/) storm database we obtained data descibing severe weather types that have the greatest economic and health effects in the United States between the years [1950](http://www.nws.noaa.gov/directives/) and [2011](http://www.nws.noaa.gov/directives/).  In addition , National Weather Service [Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf) was utilized in the assessment of this study.
+
+### Enviroment information
+
+```{r}
+library(ggplot2)
+library(plyr)
+library(gridExtra)
+library(knitr)
+sessionInfo()
+
+```
+
+### Data Processing
+
+
+```{r}
+stormData <- read.csv(bzfile('StormData.csv.bz2'),header=TRUE, stringsAsFactors = FALSE)
+```
+
+### Examning the data 
+
+A. lets take a quick look at the data and the names relevant to our study
+```{r}
+str(stormData)
+names(stormData)
+```
+
+B. We can subset the desired using the EVTYPE variable and its respective information by looking at **Weather**, **Health** and **Economic Impact** and setting their appropiate columns as such:
+
+1. EVTYPE: Type of weather event
+2. BGN_DATE: Date
+3. FATALITIES: Number of fatalities
+4. INJURIES: Number of injuries
+5. PROPDMG: Amount of property damage
+6. PROPDMGEXP: Exponential of property damage
+7. CROPDMG: Amount of crop damage
+8. CROPDMGEXP:Exponential of crop damage
+
+```{r}
+col<-c("EVTYPE","BGN_DATE","FATALITIES","INJURIES","PROPDMG","PROPDMGEXP","CROPDMG","CROPDMGEXP")
+substorm<-stormData[col]
+cleanstorm<-unique(substorm$EVTYPE)
+```
+
+C. After subsetting the data, we need to convert the fields **PROPDMGEXP** and **CROPDMGEXP** into numeric ones by creating two new columns in which its units read: Hundreds (H), Thousands (K), Millions (M) and Billions (B)
+
+```{r PROPDMGEXP, echo=TRUE}
+unique(substorm$PROPDMGEXP)
+```
+
+1. Conversion of PROPDMGEXP into numbers column
+```{r}
+library(plyr)
+substorm$PROPex<-substorm$PROPDMGEXP
+substorm$PROPex <- revalue(substorm$PROPex, c("K"="3", "M"="6","m"="6","B"="9","+"="0","h"="2","H"="2","-"="0","?"="0"))
+substorm$PROPex[substorm$PROPex==""]<-"0"
+substorm$PROPex<-as.numeric(substorm$PROPex)
+```
+
+2. Conversion of CROPDMGEXP into numbers column
+```{r CROPDMGEXP, echo=TRUE}
+unique(substorm$CROPDMGEXP)
+```
+
+```{r}
+substorm$CROPex<-substorm$CROPDMGEXP
+substorm$CROPex <- revalue(substorm$CROPex, c("K"="3","k"="3", "M"="6","m"="6","B"="9","?"="0"))
+substorm$CROPex[substorm$CROPex==""]<-"0"
+substorm$CROPex<-as.numeric(substorm$CROPex)
+```
+
+3. Calculations of **Total Property Damage** and **Total Crop damage**
+```{r}
+substorm$TOTALPROPDMG <- substorm$PROPDMG * (10^substorm$PROPex)
+substorm$TOTALCROPDMG <- substorm$CROPDMG * (10^substorm$CROPex)
+```
+
+### Results 
+
+A. Question 1: Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?
+
+In order to answer this question, lets examine the top 10 events that caused most harm in 2 categories: fatalities and injuries 
+  
+  1. Injuries   
+```{r}
+allinjuries<-aggregate(INJURIES~EVTYPE, data = substorm, "sum")
+injuries<-allinjuries[order(-allinjuries$INJURIES), ][1:10, ]
+injuries
+```
+
+```{r}
+library(ggplot2)
+injuryplot<-qplot(EVTYPE, data = injuries, weight = INJURIES, geom = "bar", fill = green) + 
+    xlim("TORNADO","TSTM WIND","FLOOD","EXCESSIVE HEAT","LIGHTNING", "HEAT","ICE STORM","FLASH FLOOD","THUNDERSTORM WIND","HAIL")+
+    scale_y_continuous("Injuries") + 
+    theme(axis.text.x = element_text(angle = 45, 
+    hjust = 1)) + xlab("Weather Event") + 
+    ggtitle ("Weather Event by Injuries")
+```
+
+  As we can see, tornadoes caused the most injuries by **91346**
+
+  2. Fatalities
+```{r}
+allfatalities<-aggregate(FATALITIES~EVTYPE, data = substorm, "sum")
+fatalities<-allfatalities[order(-allfatalities$FATALITIES), ][1:10, ]
+fatalities
+```
+
+```{r}
+library(ggplot2)
+fatalplot<-qplot(EVTYPE, data = fatalities, weight = FATALITIES, geom = "bar", fill =I("purple")) + 
+    xlim("TORNADO","EXCESSIVE HEAT","FLASH FLOOD","HEAT","LIGHTNING", "TSTM    WIND","FLOOD","RIP CURRENT","HIGH WIND","AVALANCHE")+
+    scale_y_continuous("Fatalities") + 
+    theme(axis.text.x = element_text(angle = 45, 
+    hjust = 1)) + xlab("Weather Event") + 
+    ggtitle("Weather Events by Fatalities")
+
+```
+
+  As we can seem tornadoes again caused the most fatalities by **5633**

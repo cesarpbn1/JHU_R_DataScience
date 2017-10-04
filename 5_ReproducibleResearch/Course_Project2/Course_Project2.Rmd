@@ -1,0 +1,35 @@
+---
+title: 'Reproducible Research: Course Project 2'
+author: "Cesar Rene Pabon Bernal"
+date: "June 26, 2016"
+output: html_document
+---
+
+
+## Synopsis
+
+In this report we aim to describe which severe weather types that have the greatest economic and health effects in the United States between the years 1950 and 2011.  Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern.  Our overall hypotheses is that floods cause the greatest economic consequences and tornadoes are most harmful with respect to population health.  To investigate this hypothesis, we obtained data from the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database for the years 1996 and 2011 (the most recent complete year available). From these data, we found that, in the U.S. from the years of 1950 and 2011, floods caused the most economic damage and tornadoes are the most injuries. 
+
+## Loading and Processing the Data
+
+The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. Set lambda = 0.2 for all of the simulations. You will investigate the distribution of averages of 40 exponentials using a thousand simulations.  Three questions will be asnwered in Part 1: 
+
+1. Show the sample mean and compare it to the theoretical mean of the distribution.
+
+2. Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+
+3. Show that the distribution is approximately normal.
+
+
+### Enviroment information
+
+```{r}
+library(ggplot2)
+library(plyr)
+library(gridExtra)
+sessionInfo()
+library(knitr)
+
+```
+
+### Data Processing
