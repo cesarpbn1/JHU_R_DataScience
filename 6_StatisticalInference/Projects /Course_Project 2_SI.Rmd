@@ -1,0 +1,128 @@
+---
+title: 'Course Project (Part 2): Basic Inferential Data Analysis'
+author: "Cesar Rene Pabon Bernal"
+date: "July 24, 2016"
+output: pdf_document
+---
+
+## Overview
+
+
+In this report we aim to analyze the ToothGrowth data in the R datasets package by performing some basic exploratory data analyses.  This will be accomplished by answering the following requests: 
+
+
+1. Load and explore the data 
+
+2. Provide a basic summary 
+
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. 
+
+4. State your conclusions and the assumptions needed for your conclusions.
+
+##Load & Explore the Data 
+
+Let's first load the desired Toothgrowth package and its data
+
+```{r}
+library(ggplot2)
+library(ggExtra)
+library(datasets)
+data(ToothGrowth)
+```
+
+Now let's explore the data by looking at
+
+A. Its variables 
+```{r, echo=FALSE}
+str(ToothGrowth)
+```
+
+B. Number of of Rows 
+```{r, echo=FALSE}
+rows <- nrow(ToothGrowth)
+cat("ToothGrowth Data Number of Rows: ", rows)
+```
+
+
+## Basic Summary 
+
+A. Summary of all variables 
+
+```{r, echo=FALSE}
+summary(ToothGrowth)
+head(ToothGrowth)
+```
+
+B. Summary of dose levels and delivery methods
+```{r, echo=FALSE}
+table(ToothGrowth$dose, ToothGrowth$supp)
+```
+
+```{r, include=FALSE}
+ToothGrowth$dose<-as.factor(ToothGrowth$dose)
+MeanSupp = split(ToothGrowth$len, ToothGrowth$supp)
+sapply(MeanSupp, mean)
+```
+
+C. Box Plot of our summary between Supplement and Tooth Length demonstrating that OJ has a better effect on teeth growth than VC.
+
+```{r}
+ggplot(aes(x=supp, y=len), data=ToothGrowth) + geom_boxplot(aes(fill=supp))+ 
+        xlab("Supplement") +ylab("Tooth Length") 
+```
+
+
+D. Box Plot of Tooth Length relative to Dosage demonstrating there isn't much correlation between both variables.
+
+```{r, include=FALSE}
+MeanDose = split(ToothGrowth$len, ToothGrowth$dose)
+sapply(MeanDose, mean)
+```
+```{r}
+ggplot(aes(x=dose, y=len), data=ToothGrowth) + geom_boxplot(aes(fill=dose)) + 
+        xlab("Dose (mg)") +ylab("Tooth Length")
+```
+
+
+## Confidence Intervals and/or Hypothesis Tests
+
+A. Lets first examine the group differences in accordance to different supplement types.
+
+```{r}
+t.test(len ~ supp, paired = F, var.equal = F, data = ToothGrowth)
+```
+
+As we can see, the  *p-value = 0.06063* and the confidence interval contains the value zero. Therefore we can't eliminate the hypothesis different supplement types have an effect on Tooth Length.
+
+B. Now lets examine the data when Dosage is a Factor by analyzing the correlation between the Dosage and change in Tooth Growth.
+
+```{r}
+dose_1 <- subset(ToothGrowth, dose %in% c(0.5, 1.0))
+dose_2 <- subset(ToothGrowth, dose %in% c(0.5, 2.0))
+dose_3 <- subset(ToothGrowth, dose %in% c(1.0, 2.0))
+```
+```{r}
+t.test(len ~ dose, paired = F, var.equal = F, data = dose_1)
+t.test(len ~ dose, paired = F, var.equal = F, data = dose_2)
+t.test(len ~ dose, paired = F, var.equal = F, data = dose_3)
+```
+
+
+C. Lastly, lets examine the data when Supplement is a Factor (within Dose Levels) by analyzing the correlation between Dosage and Tooth Growth
+
+```{r}
+dose_4 <- subset(ToothGrowth, dose == 0.5)
+dose_5 <- subset(ToothGrowth, dose == 1.0)
+dose_6 <- subset(ToothGrowth, dose == 2.0)
+t.test(len ~ supp, paired = F, var.equal = F, data = dose_4)
+t.test(len ~ supp, paired = F, var.equal = F, data = dose_5)
+t.test(len ~ supp, paired = F, var.equal = F, data = dose_4)
+```
+
+As we can see, all three of the  *p-values < 0.05* (significantly) and the confidence interval does not contain zero. In addition, the *mean* Tooth Length increases when Dosage increases and thus, we are unable to eliminate the hypothesis. 
+
+## Conclusions and Assumptions 
+
+In conclusion, we have discovered that increasing the Dosage leads to an increase in Tooth Growth and that types of Supplements used have no effect on Tooth Growth.
+
+Based on the information, we can assume that the experiment was conducted in a generalized manner in which the conclusions can hold validity.  Details such as randomized selection of subjects, Dosage, and Supplements, hold positive to that claim.

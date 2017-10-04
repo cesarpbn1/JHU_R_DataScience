@@ -1,0 +1,144 @@
+---
+title: 'Course Project (Part 1): Simulation Exercise'
+author: "Cesar Rene Pabon Bernal"
+date: "July 24, 2016"
+output: pdf_document
+---
+
+## Overview
+
+
+In this report we aim to investigate the exponential distribution in R and compare it with the Central Limit Theorem.   We will illustrate, via simulation and associated explanatory text, the properties of the distribution of the mean of 40 exponentials using 1000 simulations.
+
+The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. Set lambda = 0.2 for all of the simulations. You will investigate the distribution of averages of 40 exponentials using a thousand simulations.  Three questions will be asnwered:
+
+1. Show the sample mean and compare it to the theoretical mean of the distribution.
+
+2. Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+
+3. Show that the distribution is approximately normal.
+
+
+#### Enviroment information
+
+
+```{r}
+library(knitr)
+knitr::opts_chunk$set(echo=TRUE, fig.path='part1/', fig.width=10, fig.height=6, cache=TRUE)
+set.seed(1000)
+```
+
+
+## Simulations
+
+Before we process and examine our data, we must first simuate our parameters using the information provided.
+
+```{r}
+lambda <- 0.2
+n <- 40 
+sim <- 1000
+sim_matrix <- matrix(rexp(sim*n, rate=lambda), sim, n)
+```
+
+
+## Processing & Examining Data
+
+
+
+### Question 1:Sample Mean versus Theoretical Mean
+
+
+
+A. Let's find out what the sample mean is so we can then compare it to our theoretical mean and graph it
+
+
+```{r}
+sim_mean <- rowMeans(sim_matrix)
+sample_mean <- mean(sim_mean)
+```
+```{r, echo=FALSE}
+cat("Sample Mean: ", sample_mean)
+```
+```{r}
+## Graph 
+hist(sim_mean, xlab="Mean", ylab="Frequency", main="Histogram of the Mean of 40 Exponentials using 1000 Simulations", col="blue")
+abline(v = sample_mean, col = "red")
+```
+
+
+
+B. Let's find out what the theoretical mean is 
+
+
+
+```{r}
+theoretical_mean <- 1/lambda
+difference_of_means <- (theoretical_mean - sample_mean)
+```
+```{r, echo= FALSE}
+cat("Theoretical Mean: ", theoretical_mean)
+cat("Differnce between both Means: ", difference_of_means )
+```
+
+As we can wee the sample mean is 0.01303661 less than the theoretical mean; quite close.
+
+
+
+### Question 2: Sample Variance versus Theoretical Variance
+
+
+
+A. Using variance, let's find out how variable the sample is and compare it to the theoretical variance of the distribution.
+
+
+```{r}
+sample_var <- var(sim_mean)
+theoretical_var <- (1/lambda)^2/n  
+difference_of_variance <- (theoretical_var - sample_var)
+```
+```{r, echo= FALSE}
+cat("sample variance: ", sample_var)
+cat("theoretical variance: ", theoretical_var)
+cat("Differnce between both Variances: ", difference_of_variance )
+```
+
+As we can see the sample variance is 0.03335507  greater than the theoretical variance; again, very close. 
+
+
+### Question 3: Distribution
+
+
+
+A. In order to show that the distribution is approximately normal, let's first create and examine an approximate normal distribution for our data.
+
+```{r}
+hist(sim_mean, density=20, breaks=20, prob=TRUE, xlab="Mean", ylab="Frequency", main="Histogram of the Mean of 40 Exponentials using 1000 Simulations", col="dark green")
+curve(dnorm(x, mean=sample_mean, sd=sqrt(sample_var)), col="red", lwd=2, lty = "solid", add=TRUE, yaxt="n")
+curve(dnorm(x, mean=theoretical_mean, sd=sqrt(theoretical_var)), col="black", lwd=2, add=TRUE, yaxt="n")
+abline(v = sample_mean, col = "yellow")
+```
+
+As we can see, normal and theoritcla results are very close and therefore can be examined.
+
+B.  In order to reassure our resuls, confidence intervals will be used.
+
+```{r}
+Sample_confidence <- round (mean(sim_mean) + c(-1,1)*1.96*sd(sim_mean)/sqrt(n),3)
+Theoretical_confidence <- theoretical_mean + c(-1,1)*1.96*sqrt(theoretical_var)/sqrt(n)
+```
+```{r, echo=FALSE}
+cat("Sample Confidence Interval: ", Sample_confidence)
+cat("Theoretical Confidence Interval: ", Theoretical_confidence)
+```
+
+
+C. In order to finalize our comparison, a sample quantile to theoretical quantile examination will be performed 
+
+```{r, echo= FALSE}
+qqnorm(sim_mean, main="Sample Quantile vs Theoretical Quantile Plot", xlab="Theoretical", ylab="Sample")
+qqline(sim_mean, col="dark red")
+```
+
+## Conclusion 
+
+In conclusion, we have observed, that the distribution of the mean of 40 exponentials using 1000 simulations is close to a normal distribution.  The  sample and theortical results (mean and vairance) exemplified such results through investigation of the exponential distribution and comparisons to Central Limit Theorem (CLT).
