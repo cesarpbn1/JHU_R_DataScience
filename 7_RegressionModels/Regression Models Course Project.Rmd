@@ -1,0 +1,122 @@
+---
+title: "Regression Models Course Project"
+author: "Cesar Rene Pabon Bernal"
+date: "August 21, 2016"
+output: pdf_document
+---
+
+## Executive Summary
+
+In this report we aim to explore the `mtcars` data set (found in the 1974 *Motor Trend* US magazine) and the specific relationship between a set of variables and miles per gallon (MPG) between automatic and manual transmissions.  Our hypothesis is that automatic transmission motor vehicles are more effective for MPG than manuals. To investigate this hypothesis, an exploratory data and a regression models analyses was utilized to evaluate such claim.  However, when explored, we found that this was not the case as data showed that manual transmission vehicles are better for MPG by a factor of 1.8 compared to automatic transmissions.  Therefore, cars that wight less with a manual transmission and cars weight more with an automatic transmission will have higher MPG.
+
+## Environment Information
+
+```{r}
+library(ggplot2)
+data(mtcars)
+```
+
+
+## Exploratory Analysis
+
+```{r}
+head(mtcars)
+str(mtcars)
+summary(mtcars)
+mtcars[1:5, ]
+dim(mtcars)
+mtcars$cyl <- as.factor(mtcars$cyl)
+mtcars$vs <- as.factor(mtcars$vs)
+mtcars$am <- factor(mtcars$am)
+mtcars$gear <- factor(mtcars$gear)
+mtcars$carb <- factor(mtcars$carb)
+attach(mtcars)
+```
+
+**please refer to Appendix**
+
+A box-plot was made comparing both manual and automatic transmissions.  The plot tells us that manual transmissions have higher MPG values and therefore, more gas friendly.  Also, a correlation between variables "cyl",  "wt", "disp", "hp" and "MPG" is visible.
+
+
+## Regression Analysis
+
+Linear regression models and a best fit model test will be evaluated in accordance to the respective variables.
+
+An initial model will be made using all the variables as predictors, and perfom stepwise model selection to isolate significant predictors for the best model. 
+
+```{r}
+initialmodel <- lm(mpg ~ ., data = mtcars)
+basemodel <- step(initialmodel, direction = "both")
+model <- lm(mpg ~ cyl + hp + wt + am, data = mtcars)
+summary(basemodel)
+```
+
+As we can see our Adjusted R-squared value is 0.84 or 84% telling ud that at least of 84% is explained by the combined model above.
+
+
+```{r}
+basemodel <- lm(mpg ~ am, data = mtcars)
+anova(basemodel, basemodel)
+```
+
+Using automatic as the predictor variable in our base model, we will compare it with the previous base model and observe their relation.
+
+**please refer to Appendix**
+
+As we can see, the p-value is considerable telling us that the automatic and manual transmissions are different thus must be considered in whether the hypothesis will be rejected or preserved.
+
+
+## Residual plot and Diagnostics
+
+
+**please refer to Appendix**
+
+According to the observed values, we can diagnose that Scale-Location plot reassures the constant variance assumption, the Residuals vs. Leverage promotes that no outliers are present, the Residuals vs. Fitted plot are inconsistent, and that the Normal Q-Q plot  are normally distributed normally. 
+
+## Statistical Inference 
+
+In order to either confirm or discard our hypothesis, a T-Test will performed comparing once more tranmissions and mpg.
+
+
+```{r}
+t.test(mpg ~ am, data = mtcars)
+```
+
+As we can see, both manual and automatic transmissions are different.  Our hypothesis was wrong and thus, can be be anulled.
+
+## Conclusions
+
+In conclusion, we have observed that *MPG* is effected by changes in the variables cyl, hp and wt. Motor Vehicles with manual transmission get about 1.8 MPG more than automatic transmission as *MPG* decreases by about 2.5 for every 1000 pound increase in weight. Inversely, *MPG* decreases very marginally with horsepower, about 3 MPG for every 100 horsepower.
+
+## Appendix
+
+1. Exploratory Analysis
+
+```{r, echo=FALSE}
+boxplot(mpg ~ am, xlab="Transmission (0 = Automatic, 1 = Manual)", ylab="MPG", main=" MPG vs. Transmission")
+```
+
+2. Regression Analysis
+
+a)
+
+```{r, echo=FALSE}
+pairs(mtcars, panel=panel.smooth, main="Motor Trend Car Road Tests")
+```
+
+b)
+
+```{r, echo=FALSE}
+ggplot(mtcars, aes(x=wt, y=mpg, group=am, color=am, height=3, width=3)) + geom_point() +  
+scale_colour_discrete(labels=c("Automatic", "Manual")) + 
+xlab("weight") + ggtitle(" MPG vs. Weight by Transmission")
+```
+
+3. Residual plot and Diagnostics
+
+
+```{r, echo=FALSE}
+par(mfrow = c(2, 2))
+plot(model)
+```
+
